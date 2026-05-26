@@ -1,6 +1,11 @@
 import './style.css';
 
-const state = { cart: [], currentPage: 'home', selectedSizes: { almond: '250გ', cashew: '250გ' } };
+const state = {
+  cart: [],
+  currentPage: 'home',
+  selectedProduct: 'almond',
+  selectedSizes: { almond: '250გ', cashew: '250გ' }
+};
 const prices = { '50გ': 4.50, '125გ': 9.90, '250გ': 17.50 };
 const sizeLabels = { '50გ': 'პატარა', '125გ': 'საშუალო', '250გ': 'დიდი' };
 
@@ -50,41 +55,84 @@ function panClass(size) {
   return 'pan-50g';
 }
 
-/* ── selectProductSize — NO re-render, pure DOM update ────── */
+/* ── selectShowcaseProduct ────────────────────────────────── */
+function selectShowcaseProduct(product) {
+  state.selectedProduct = product;
+  
+  const container = document.querySelector('.shop-unified-container');
+  if (!container) return;
+  
+  /* Update active tab */
+  container.querySelectorAll('.product-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.productSelect === product);
+  });
+  
+  const productNames = { almond: 'ნუში', cashew: 'ქეშიუ' };
+  const productDescs = {
+    almond: 'მოხალული, კარამელიზირებული ნუში',
+    cashew: 'მოხალული, კარამელიზირებული ქეშიუ'
+  };
+  const productImgs = {
+    almond: '/images/nushi-all-sizes.jpg',
+    cashew: '/images/qeshiu-all-sizes.jpg'
+  };
+  
+  /* Update title and description */
+  const title = document.getElementById('showcaseTitle');
+  if (title) title.textContent = productNames[product];
+  
+  const desc = document.getElementById('showcaseDesc');
+  if (desc) desc.textContent = productDescs[product];
+  
+  /* Update main image */
+  const img = document.getElementById('showcaseImg');
+  if (img) {
+    img.src = productImgs[product];
+    img.alt = productNames[product];
+  }
+  
+  /* Select correct size (pans image, updates price & add-to-cart button) */
+  const size = state.selectedSizes[product];
+  selectProductSize(product, size);
+}
+
+/* ── selectProductSize ────────────────────────────────────── */
 function selectProductSize(product, size) {
   state.selectedSizes[product] = size;
 
-  const card = document.querySelector(`.shop-card[data-product="${product}"]`);
-  if (!card) return;
+  const container = document.querySelector('.shop-unified-container');
+  if (!container) return;
 
-  /* 1. Update active button */
-  card.querySelectorAll('.size-btn').forEach(btn => {
+  /* 1. Update active size button */
+  container.querySelectorAll('.size-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.size === size);
   });
 
   /* 2. Camera pan — swap pan class on the img */
-  const img = card.querySelector('.shop-card-img-pan');
+  const img = document.getElementById('showcaseImg');
   if (img) {
-    img.classList.remove('pan-250g', 'pan-125g', 'pan-50g');
-    img.classList.add(panClass(size));
+    img.className = `shop-card-img-pan ${panClass(size)}`;
   }
 
   /* 3. Zoom-pulse on container */
-  const container = card.querySelector('.shop-card-img-container');
-  if (container) {
-    container.classList.add('focus-zoom');
-    setTimeout(() => container.classList.remove('focus-zoom'), 320);
+  const imgContainer = container.querySelector('.shop-card-img-container');
+  if (imgContainer) {
+    imgContainer.classList.add('focus-zoom');
+    setTimeout(() => imgContainer.classList.remove('focus-zoom'), 320);
   }
 
   /* 4. Update displayed price */
-  const priceVal = card.querySelector('.price-value');
+  const priceVal = document.getElementById('showcasePrice');
   if (priceVal) {
     priceVal.innerHTML = `${prices[size].toFixed(2)} <span class="price-currency">₾</span>`;
   }
 
-  /* 5. Update add-to-cart button data attribute */
-  const addBtn = card.querySelector('.btn-add-cart');
-  if (addBtn) addBtn.dataset.addSize = size;
+  /* 5. Update add-to-cart button data attributes */
+  const addBtn = document.getElementById('showcaseAddBtn');
+  if (addBtn) {
+    addBtn.dataset.addProduct = product;
+    addBtn.dataset.addSize = size;
+  }
 }
 
 /* ── Navbar ───────────────────────────────────────────────── */
@@ -154,56 +202,89 @@ function Story() {
   </section>`;
 }
 
-/* ── ShopCard — camera-pan version ───────────────────────── */
-function ShopCard(product, name, desc, img) {
-  const sel   = state.selectedSizes[product];
-  const price = prices[sel];
-  return `<div class="shop-card" data-product="${product}">
-    <div class="shop-card-badge">Candy Nuts</div>
-    <h3>${name}</h3>
-    <p class="shop-desc">${desc}</p>
-    <div class="shop-card-img-container">
-      <img
-        src="${img}"
-        alt="${name}"
-        class="shop-card-img-pan ${panClass(sel)}"
-      />
-    </div>
-    <div class="size-selector">
-      ${['50გ', '125გ', '250გ'].map(s => `
-        <button
-          type="button"
-          class="size-btn ${s === sel ? 'active' : ''}"
-          data-product="${product}"
-          data-size="${s}"
-        >
-          <span class="size-weight">${s}</span>
-          <span class="size-price">${prices[s].toFixed(2)} ₾</span>
-        </button>`).join('')}
-    </div>
-    <div class="shop-card-footer">
-      <div>
-        <div class="price-label">ფასი</div>
-        <div class="price-value">${price.toFixed(2)} <span class="price-currency">₾</span></div>
-      </div>
-      <button type="button" class="btn-add-cart" data-add-product="${product}" data-add-size="${sel}">
-        ${ico.cart} კალათაში დამატება
-      </button>
-    </div>
-  </div>`;
-}
-
 /* ── Shop section ─────────────────────────────────────────── */
 function Shop() {
+  const p = state.selectedProduct || 'almond';
+  const size = state.selectedSizes[p] || '250გ';
+  const price = prices[size];
+  
+  const productNames = { almond: 'ნუში', cashew: 'ქეშიუ' };
+  const productDescs = {
+    almond: 'მოხალული, კარამელიზირებული ნუში',
+    cashew: 'მოხალული, კარამელიზირებული ქეშიუ'
+  };
+  const productImgs = {
+    almond: '/images/nushi-all-sizes.jpg',
+    cashew: '/images/qeshiu-all-sizes.jpg'
+  };
+  const productThumbs = {
+    almond: '/images/almond-package.png',
+    cashew: '/images/cashew-package.png'
+  };
+
   return `<section class="shop-section fade-in" id="shop">
     <div class="shop-header">
       <div class="section-label">შეკვეთა</div>
       <h2>აირჩიე შენი გემო</h2>
       <p>აირჩიე ნუში და ქეშიუ შენი სასურველი ზომით — 50გ, 125გ ან 250გ — და შეუკვეთე ახლავე.</p>
     </div>
-    <div class="shop-grid">
-      ${ShopCard('almond', 'ნუში',  'კარამელინჯაელი და ყოყლოჩინა', '/images/nushi-all-sizes.jpg')}
-      ${ShopCard('cashew', 'ქეშიუ', 'კარამელინჯაელი და ყოყლოჩინა', '/images/qeshiu-all-sizes.jpg')}
+    
+    <div class="shop-unified-container">
+      <!-- Left Side: Image Showcase -->
+      <div class="showcase-image-area">
+        <div class="shop-card-img-container">
+          <img
+            src="${productImgs[p]}"
+            alt="${productNames[p]}"
+            class="shop-card-img-pan ${panClass(size)}"
+            id="showcaseImg"
+          />
+        </div>
+      </div>
+      
+      <!-- Right Side: Configurator Controls -->
+      <div class="showcase-controls-area">
+        <div class="shop-card-badge">Candy Nuts</div>
+        
+        <div class="product-selector-label">აირჩიე პროდუქტი</div>
+        <div class="product-tabs">
+          <button type="button" class="product-tab-btn ${p === 'almond' ? 'active' : ''}" data-product-select="almond">
+            <img src="${productThumbs.almond}" alt="ნუში" class="product-tab-thumb" />
+            <span>ნუში</span>
+          </button>
+          <button type="button" class="product-tab-btn ${p === 'cashew' ? 'active' : ''}" data-product-select="cashew">
+            <img src="${productThumbs.cashew}" alt="ქეშიუ" class="product-tab-thumb" />
+            <span>ქეშიუ</span>
+          </button>
+        </div>
+        
+        <h3 id="showcaseTitle">${productNames[p]}</h3>
+        <p class="shop-desc" id="showcaseDesc">${productDescs[p]}</p>
+        
+        <div class="product-selector-label">აირჩიე ზომა</div>
+        <div class="size-selector">
+          ${['50გ', '125გ', '250გ'].map(s => `
+            <button
+              type="button"
+              class="size-btn ${s === size ? 'active' : ''}"
+              data-product="${p}"
+              data-size="${s}"
+            >
+              <span class="size-weight">${s}</span>
+              <span class="size-price">${prices[s].toFixed(2)} ₾</span>
+            </button>`).join('')}
+        </div>
+        
+        <div class="shop-card-footer">
+          <div>
+            <div class="price-label">ფასი</div>
+            <div class="price-value" id="showcasePrice">${price.toFixed(2)} <span class="price-currency">₾</span></div>
+          </div>
+          <button type="button" class="btn-add-cart" id="showcaseAddBtn" data-add-product="${p}" data-add-size="${size}">
+            ${ico.cart} კალათაში დამატება
+          </button>
+        </div>
+      </div>
     </div>
   </section>`;
 }
@@ -311,17 +392,27 @@ function bindEvents() {
     }
   }));
 
+  /* Product selection tabs */
+  document.querySelectorAll('.product-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectShowcaseProduct(btn.dataset.productSelect);
+    });
+  });
+
   /* Size buttons — camera pan, NO re-render */
   document.querySelectorAll('.size-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      selectProductSize(btn.dataset.product, btn.dataset.size);
+      selectProductSize(state.selectedProduct, btn.dataset.size);
     });
   });
 
   /* Add to cart */
-  document.querySelectorAll('[data-add-product]').forEach(btn => {
-    btn.addEventListener('click', () => addToCart(btn.dataset.addProduct, btn.dataset.addSize));
-  });
+  const showcaseAddBtn = document.getElementById('showcaseAddBtn');
+  if (showcaseAddBtn) {
+    showcaseAddBtn.addEventListener('click', () => {
+      addToCart(showcaseAddBtn.dataset.addProduct, showcaseAddBtn.dataset.addSize);
+    });
+  }
 
   /* Remove from cart */
   document.querySelectorAll('[data-remove]').forEach(btn => {
