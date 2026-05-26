@@ -36,15 +36,11 @@ function Navbar() {
       <a href="/cashews" data-nav="cashews" class="${state.currentPage === 'cashews' ? 'active' : ''}">ქეშიუ</a>
       <a href="/#shop" data-nav="home" data-scroll="shop">მაღაზია</a>
     </div>
-    <a href="/#shop" class="nav-cart" data-nav="home" data-scroll="cart">${ico.cart} კალათა ${c > 0 ? `<span class="cart-count">${c}</span>` : ''}</a>
     <button class="mobile-menu-btn" id="mobileMenuBtn"><span></span><span></span><span></span></button>
   </nav>`;
 }
 
-function TopBanner() {
-  const items = Array(8).fill('CANDY NUTS — შეუკვეთე ახლავე').map(t => `<span class="banner-item">${t}</span>`).join('');
-  return `<div class="top-banner"><div class="banner-track">${items}</div></div>`;
-}
+
 
 function Hero() {
   return `<section class="hero" id="hero">
@@ -153,7 +149,7 @@ function render() {
   if (state.currentPage === 'almonds' || state.currentPage === 'cashews') {
     app.innerHTML = DetailPage(state.currentPage);
   } else {
-    app.innerHTML = `${Navbar()}${TopBanner()}${Hero()}${Products()}${Partners()}${Story()}${Shop()}${Cart()}${CTA()}${Footer()}`;
+    app.innerHTML = `${Navbar()}${Hero()}${Products()}${Partners()}${Story()}${Shop()}${Cart()}${CTA()}${Footer()}`;
   }
   bindEvents(); initObserver(); initNavScroll();
 }
