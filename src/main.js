@@ -110,9 +110,9 @@ function Hero() {
   return `<section class="hero" id="hero">
     <div class="hero-bg-text">CANDY NUTS</div>
     <div class="hero-num">01</div>
-    <p class="hero-tag">საოსალელი <span>&</span> კარამელინჯაელი <span>&</span> ბუნებრივი</p>
-    <h1>ნატურალური გემო<br>ყოველდღე.</h1>
-    <p>Candy Nuts გთავაზობთ სხვადასხვა ნუში და ქეშიუ, ბუნებრივი კარამელინჯაელი და ყოყლოჩინა. ბუნებრივი ინგრედიენტები და ნატურალური გემო.</p>
+    <p class="hero-tag">მოხალული <span>&</span> კარამელიზირებული <span>&</span> ბუნებრივი</p>
+    <h1>პრემიუმ ხარისხის<br>თხილეული.</h1>
+    <p>Candy Nuts გთავაზობთ პრემიუმ ხარისხის მოხალულ და კარამელიზირებულ ნუშსა და ქეშიუს. ბუნებრივი ინგრედიენტები, უნიკალური გემო.</p>
     <div class="hero-buttons">
       <a href="/#shop" class="btn-primary" data-nav="home" data-scroll="shop">${ico.cart} შეუკვეთე ახლავე</a>
       <a href="/almonds" class="btn-secondary" data-nav="almonds">გაიგეთ მეტი</a>

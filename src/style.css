@@ -244,7 +244,7 @@ ul{list-style:none}
 .shop-card-img-container{
   position:relative;
   width:100%;
-  height:420px;
+  aspect-ratio:9/14;
   overflow:hidden;
   background:#fdfaf6;
   transition:transform 0.3s ease;
@@ -253,23 +253,25 @@ ul{list-style:none}
   transform:scale(1.03);
 }
 
-/* The panoramic image itself — 3× width of container, height fills */
+/* The panoramic image itself — 3× width of container, natural height */
 .shop-card-img-pan{
   width:300%;
-  height:100%;
+  height:auto;
   max-width:none;
-  object-fit:cover;
   display:block;
+  position:absolute;
+  top:50%;
+  left:0;
   transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
 }
 .shop-card-img-pan.pan-left{
-  transform:translateX(0%);
+  transform:translateX(0%) translateY(-50%);
 }
 .shop-card-img-pan.pan-center{
-  transform:translateX(-33.333%);
+  transform:translateX(-33.333%) translateY(-50%);
 }
 .shop-card-img-pan.pan-right{
-  transform:translateX(-66.666%);
+  transform:translateX(-66.666%) translateY(-50%);
 }
 
 /* Card body — controls area */
@@ -420,7 +422,7 @@ ul{list-style:none}
 
   /* Shop card mobile — image stays visible, compact controls below */
   .shop-card{border-radius:16px}
-  .shop-card-img-container{height:280px}
+  .shop-card-img-container{aspect-ratio:9/12}
   .shop-card-body{padding:24px 20px}
   .shop-card-body h3{font-size:1.4rem}
   .size-selector{gap:6px}
@@ -443,7 +445,7 @@ ul{list-style:none}
 
 /* Extra-small screens (< 400px) */
 @media(max-width:400px){
-  .shop-card-img-container{height:220px}
+  .shop-card-img-container{aspect-ratio:9/11}
   .shop-card-body{padding:20px 16px}
   .shop-card-body h3{font-size:1.2rem}
   .btn-add-cart{padding:11px 14px;font-size:.78rem}
